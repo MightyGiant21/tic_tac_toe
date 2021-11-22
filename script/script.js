@@ -64,12 +64,8 @@ const gameBoard = (() => {
         if (boardData[i][j] == 0) {
           // Place current player marker in cell
           boardData[i][j] = player;
-          // Change player
-          if (player == 1) {
-              player = 2
-          } else {
-              player = 1
-          };
+          // Change player (if player is 1, it becomes -1. If player is -1 it becomes 1. So this way it always toggles between player 1 and -1)
+          player *= -1
           // Update game board with markers
           drawMarkers();
           // Check to see if the game is over
@@ -93,7 +89,7 @@ const gameBoard = (() => {
         for (j = 0; j < 3; j++) {
           if (boardData[i][j] == 1) {
             board.children[(i*3) + j].classList.add("x");
-          } else if (boardData[i][j] == 2) {
+          } else if (boardData[i][j] == -1) {
             board.children[(i*3) + j].classList.add("circle");
           };
         };
@@ -102,8 +98,26 @@ const gameBoard = (() => {
 
     // Function to check the winner
     const checkGameOver = () => {
-    };
+      // Check rows and columns
+      for (i = 0; i < boardData.length; i++) {
+        let rowSum = boardData[i][0] + boardData[i][1] + boardData[i][2];
+        let colSum = boardData[0][i] + boardData[1][i] + boardData[2][i];
+        // Check if all X or all O in any rows or columns
+        if (rowSum == 3 || colSum == 3) {
+          console.log("P1 Wins");
+        } else if (rowSum == -3 || colSum == -3) {
+          console.log("P2 Wins");
+        }
+      }
 
+      //
+      //
+      //Need to now check the two diagonals//
+      //
+      //
+
+
+    };
     return {
       init
     };
@@ -124,7 +138,7 @@ const createPlayer = () => {
 
       if (winner == 1) {
         playerOneScore ++
-      } else if (winner == 2) {
+      } else if (winner == -1) {
         playerTwoScore ++
       }
     };
@@ -140,8 +154,15 @@ const createPlayer = () => {
     return {updateScore, init}
 };
 
+// Helper functions
+function add(counter, a) {
+  return counter + a;
+} 
+
 
 // Draw game grid
 gameBoard.init();
+
+
 
 // Test area

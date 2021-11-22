@@ -11,6 +11,7 @@
 
 body {
     background-color: #e0ff57;
+    font-family: Helvetica, sans-serif;
 }
 
 .boardContainer {
@@ -107,13 +108,14 @@ body {
 }
 
 label {
-    font-size: 25px;
+    font-size: 1.5rem;
     color: #fd4242;
     font-weight: 500;
+    margin-top: 20px
 }
 
 #playerOne, #playerTwo {
-    font-size: 25px;
+    font-size: 1.5rem;
     outline: none;
     border-radius: 5px;
     border: none;
@@ -125,10 +127,15 @@ label {
     margin-top: 2rem;
     background-color: #fa5555;
     color: #f0fd42;
-    width: 8rem;
-    height: 2rem;
-    font-size: 20px;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1.5rem;
     border-radius: 5px;
+}
+
+.submitBtn:hover {
+    cursor: pointer;
+    background-color: #da2d2d;
 }
 
 .playerInfoContainer {
