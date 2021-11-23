@@ -9,11 +9,15 @@
         <link rel="stylesheet" href="./style/style.css">
     </head>
     <body>
-        <div class="playerInfoContainer">
-            <div class="playerOneName"></div>
-            <div class="playerOneScore"></div>
-            <div class="playerTwoName"></div>
-            <div class="playerTwoScore"></div>
+        <div class="playerInfoContainer"> 
+            <div class="player-info">
+                <div class="playerOneName"></div>
+                <div class="playerOneScore"></div>
+            </div>
+            <div class="player-info">
+                <div class="playerTwoName"></div>
+                <div class="playerTwoScore"></div>
+            </div>
         </div>
         <div class="boardContainer">
             <div class="board">
@@ -32,10 +36,15 @@
                     <input type="text" id="playerOne">
                     <label for="playerTwo">Player two name</label>
                     <input type="text" id="playerTwo">
-                    <button type="button" class="submitBtn">Submit</button>
+                    <button type="button" class="button submit">Submit</button>
                 </form>
             </div>
         </div>
+        
+        <h1 class="game-outcome"></h1>
+
+        <button class="button restart">Restart</button>
+
         <script src="./script/script.js" async defer></script>
     </body>
 </html>

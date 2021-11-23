@@ -9,11 +9,16 @@ const gameBoard = (() => {
     [0, 0, 0]
     ];
 
+    // Define game variables
     let player = 1;
+    let gameOver = false;
+    let winner = 0;
+    let tie = false;
+
     const grid = document.querySelectorAll(".cell");
 
     const init = () => {
-      const submitBtn = document.querySelector(".submitBtn");
+      const submitBtn = document.querySelector(".submit");
       // For some reason I have to hide the cells here.
       // Setting display none in css doesn't work.
       grid.forEach(cell => {
@@ -24,6 +29,13 @@ const gameBoard = (() => {
         players.init(playerOne.value, playerTwo.value);
       });
       const players = createPlayer();
+
+      // Query selector for text display for game outcome
+      gameOutcomeText = document.querySelector(".game-outcome");
+
+      // Create restart button
+      restartButton = document.querySelector(".restart");
+      restartButton.addEventListener("click", (restartGame));
       
       checkTurn();
     };
@@ -50,6 +62,7 @@ const gameBoard = (() => {
     };
 
     const takeTurn = (index) => {
+      if (gameOver == false) {
         // Remainder by the square amount.
         // 4x4 = remainder 4.
         // 10x10 = remainder 10.
@@ -71,6 +84,7 @@ const gameBoard = (() => {
           // Check to see if the game is over
           checkGameOver();
         };
+      };
     };
 
     // Function for checking which cell has been clicked
@@ -104,20 +118,78 @@ const gameBoard = (() => {
         let colSum = boardData[0][i] + boardData[1][i] + boardData[2][i];
         // Check if all X or all O in any rows or columns
         if (rowSum == 3 || colSum == 3) {
-          console.log("P1 Wins");
+          gameOver = true;
+          winner = 1;
         } else if (rowSum == -3 || colSum == -3) {
-          console.log("P2 Wins");
+          gameOver = true;
+          winner = -1;
         }
       }
 
-      //
-      //
-      //Need to now check the two diagonals//
-      //
-      //
+      // Check diagonals
+      let diagonalSum1 = boardData[0][0] + boardData[1][1] + boardData[2][2]
+      let diagonalSum2 = boardData[0][2] + boardData[1][1] + boardData[2][0]
+      if (diagonalSum1 == 3 || diagonalSum2 == 3) {
+        gameOver = true;
+        winner = 1;
+      } else if (diagonalSum1 == -3 || diagonalSum2 == -3) {
+        gameOver = true;
+        winner = -1;
+      }
 
+      // Check for a tie
+      if (boardData[0].indexOf(0) == -1 && 
+          boardData[1].indexOf(0) == -1 && 
+          boardData[2].indexOf(0) == -1) {
+          gameOver = true;
+          tie = true;
+        };
 
+      // If game is over then trigger the appropriate function and display text
+      // 
+      // R: I have manually typed player 1 wins and player 2 wins. 
+      // This should instead take the player names from the object.
+      // This also needs to increase score
+      // 
+      if (gameOver == true) {
+        if (winner == 1) {
+          gameOutcomeText.textContent = `Player 1 Wins!!`;
+        } else if (winner == -1) {
+          gameOutcomeText.textContent = `Player 2 Wins!!`;
+        } else if (tie == true) {
+          gameOutcomeText.textContent = "It's a Tie!";
+        }
+      }
     };
+
+    // Add function to restart the game
+    const restartGame = () => {
+      // reset game variables
+      gameOver = false;
+      winner = 0;
+      tie = false;
+      player = 1;
+      boardData = 
+      [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0]
+      ];
+      gameOutcomeText.textContent = "";
+      resetMarkers();
+    }
+
+    // Function for resetting the markers after a game is finished
+    const resetMarkers = () => {
+      grid.forEach(cell => {
+        cell.className = "cell"
+      })
+    };
+
+    // 
+    // 
+    // R: What is this part below?
+    // 
     return {
       init
     };
