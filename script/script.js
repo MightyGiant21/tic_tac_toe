@@ -8,12 +8,12 @@ const gameBoard = (() => {
     [0, 0, 0],
     [0, 0, 0]
     ];
-
+    
     // Define game variables
     let player = 1;
+    let tie = false;
     let gameOver = false;
     let winner = 0;
-    let tie = false;
 
     const grid = document.querySelectorAll(".cell");
 
@@ -24,11 +24,14 @@ const gameBoard = (() => {
       grid.forEach(cell => {
         cell.style.display = "none"
       });
+      // Set event listener for form validation.
+      // Check turn cannot be called until the form validation is complete.
+      // Once form validation returns true, init players using 
+      // the names from the form.
       submitBtn.addEventListener('click', () => {
-        hasFormBeenCompleted();
-        players.init(playerOne.value, playerTwo.value);
-      });
-      const players = createPlayer();
+        if (hasFormBeenCompleted()) {
+          players.showPlayerInfo(playerOne.value, playerTwo.value);
+        }});
 
       // Query selector for text display for game outcome
       gameOutcomeText = document.querySelector(".game-outcome");
@@ -47,6 +50,7 @@ const gameBoard = (() => {
         grid.forEach(cell => {
           cell.style.display = "";
         });
+        return true
       };
     };
     
@@ -112,6 +116,7 @@ const gameBoard = (() => {
 
     // Function to check the winner
     const checkGameOver = () => {
+
       // Check rows and columns
       for (i = 0; i < boardData.length; i++) {
         let rowSum = boardData[i][0] + boardData[i][1] + boardData[i][2];
@@ -144,6 +149,8 @@ const gameBoard = (() => {
           gameOver = true;
           tie = true;
         };
+
+      players.updateWinner(winner);
 
       // If game is over then trigger the appropriate function and display text
       // 
@@ -196,45 +203,63 @@ const gameBoard = (() => {
 })();
 
 
-const createPlayer = () => {
+// Use an IIFE so the player object is initialized.
+// Now we can access anything this object returns.
+const players = (() => {
+    let playerOneScore = 0;
+    let playerTwoScore = 0;
+
 
     const updateScore = (winner) => {
       const playerOneScoreHtml = document.querySelector(".playerOneScore");
       const playerTwoScoreHtml = document.querySelector(".playerTwoScore");
-      
-      let playerOneScore = 0;
-      let playerTwoScore = 0;
-
-      playerOneScoreHtml.innerHTML = "Score: " + playerOneScore;
-      playerTwoScoreHtml.innerHTML = "Score: " + playerTwoScore;
 
       if (winner == 1) {
         playerOneScore ++
       } else if (winner == -1) {
         playerTwoScore ++
       }
+
+      playerOneScoreHtml.innerHTML = "Score: " + playerOneScore;
+      playerTwoScoreHtml.innerHTML = "Score: " + playerTwoScore;
+
     };
 
-    const init = (playerOneName, playerTwoName) => {
+    // Create 2 players using the arguments from the form.
+    // Show player names and then run update score.
+    const showPlayerInfo = (playerOneName, playerTwoName) => {
       const playerOneHtml = document.querySelector(".playerOneName");
       const playerTwoHtml = document.querySelector(".playerTwoName");
+
       playerOneHtml.innerHTML = playerOneName;
       playerTwoHtml.innerHTML = playerTwoName;
+
       updateScore();
     }
 
-    return {updateScore, init}
-};
+    const updateWinner = (winner) => {
+      switch (winner) {
+        case 1:
+          {updateScore(1)};
+          break;
+        case -1:
+          {updateScore(-1)};
+          break;
+        case 0:
+          // Score doesn't need updating if it's a draw so we leave blank.
+          {};
+          break;
+      }
+    }
+
+    return {showPlayerInfo, updateWinner}
+})();
 
 // Helper functions
 function add(counter, a) {
   return counter + a;
 } 
 
-
 // Draw game grid
 gameBoard.init();
-
-
-
 // Test area
