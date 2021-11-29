@@ -34,10 +34,11 @@ const gameBoard = (() => {
         }});
 
       // Query selector for text display for game outcome
-      gameOutcomeText = document.querySelector(".game-outcome");
+      gameOutcomeText = document.querySelector(".gameOutcome");
 
       // Create restart button
-      restartButton = document.querySelector(".restart");
+      restartButton = document.querySelector(".restartBtn");
+      gameEndInfo = document.querySelector(".restartContainer");
       restartButton.addEventListener("click", (restartGame));
       
       checkTurn();
@@ -92,7 +93,19 @@ const gameBoard = (() => {
     };
 
     // Function for checking which cell has been clicked
+    // Add hover effect to the cell
+    // Doesn't work like this, needs looking at
     const checkTurn = () => {
+      grid.forEach(cell => {
+        cell.addEventListener('mouseenter', () => { 
+          if (cell.classList != 'x') {
+            cell.classList.add('x');
+          }
+        });
+        cell.addEventListener('mouseleave', () => {
+          cell.classList.remove('x');
+        });
+      });
       grid.forEach((cell, index) => {
           cell.addEventListener('click', () => {
             takeTurn(index);
@@ -152,6 +165,7 @@ const gameBoard = (() => {
 
       players.updateWinner(winner);
 
+      console.log(players);
       // If game is over then trigger the appropriate function and display text
       // 
       // R: I have manually typed player 1 wins and player 2 wins. 
@@ -159,6 +173,7 @@ const gameBoard = (() => {
       // This also needs to increase score
       // 
       if (gameOver == true) {
+          gameEndInfo.style.display = "flex";
         if (winner == 1) {
           gameOutcomeText.textContent = `Player 1 Wins!!`;
         } else if (winner == -1) {
@@ -183,6 +198,7 @@ const gameBoard = (() => {
       [0, 0, 0]
       ];
       gameOutcomeText.textContent = "";
+      gameEndInfo.style.display = "none";
       resetMarkers();
     }
 
@@ -235,6 +251,7 @@ const players = (() => {
       playerTwoHtml.innerHTML = playerTwoName;
 
       updateScore();
+      return playerOneName
     }
 
     const updateWinner = (winner) => {
