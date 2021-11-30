@@ -219,6 +219,7 @@ const GameLogic = (() => {
             };
             GameBoard.drawMarkers(boardData);
             // AI takes it's turn, updates the board data and returns the updated data
+            // Only call if there are any empty spaces in the board
             boardData = AI.aiTakeTurn(boardData);
             GameBoard.drawMarkers(boardData);
         }
@@ -339,12 +340,18 @@ const AI = (() => {
     const aiTakeTurn = (boardData) => {
         let markPlacement = returnColAndRow();
 
-        while (boardData[markPlacement[0]][markPlacement[1]] != 0) {
-            markPlacement = returnColAndRow();
+        if (boardData[markPlacement[0]][markPlacement[1]] != 0 &&
+            (boardData[0].includes(0) ||
+            boardData[1].includes(0) ||
+            boardData[2].includes(0))) {
+            aiTakeTurn(boardData);
+        } else if (boardData[0].includes(0) ||
+            boardData[1].includes(0) ||
+            boardData[2].includes(0)) {
+            boardData[markPlacement[0]][markPlacement[1]] = -1;
+            console.log('boardData: ', JSON.stringify(boardData));
+            return boardData
         }
-
-        boardData[markPlacement[0]][markPlacement[1]] = -1;
-        return boardData
     }
 
     const returnColAndRow = () => {
