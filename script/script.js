@@ -1,282 +1,362 @@
 // This is a module.
 // Use a module because there is only one of these objects.
 // Try to declare all variables in the function they need to be in.
-const gameBoard = (() => {
-    let boardData = 
-    [
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0]
-    ];
-    
-    // Define game variables
-    let player = 1;
-    let tie = false;
-    let gameOver = false;
-    let winner = 0;
-
+const GameBoard = (() => {
     const grid = document.querySelectorAll(".cell");
+    let playAgainstPcMode = false;
 
     const init = () => {
-      const submitBtn = document.querySelector(".submit");
-      // For some reason I have to hide the cells here.
-      // Setting display none in css doesn't work.
-      grid.forEach(cell => {
-        cell.style.display = "none"
-      });
-      // Set event listener for form validation.
-      // Check turn cannot be called until the form validation is complete.
-      // Once form validation returns true, init players using 
-      // the names from the form.
-      submitBtn.addEventListener('click', () => {
-        if (hasFormBeenCompleted()) {
-          players.showPlayerInfo(playerOne.value, playerTwo.value);
-        }});
+        const submitBtn = document.querySelector(".submit");
+        const playPcBtn = document.querySelector(".playPcBtn");
+        const playHumanBtn = document.querySelector(".playHumanBtn");
+        const playModeContainer = document.querySelector(".playModeContainer")
 
-      // Query selector for text display for game outcome
-      gameOutcomeText = document.querySelector(".gameOutcome");
-
-      // Create restart button
-      restartButton = document.querySelector(".restartBtn");
-      gameEndInfo = document.querySelector(".restartContainer");
-      restartButton.addEventListener("click", (restartGame));
-      
-      checkTurn();
-    };
-
-    const hasFormBeenCompleted = () => {
-      const form = document.querySelector("#playerForm");
-      if (validationCheck() == true) {
-        form.style.display = "none";
+        // For some reason I have to hide the cells here.
+        // Setting display none in css doesn't work.
         grid.forEach(cell => {
-          cell.style.display = "";
+            cell.style.display = "none"
         });
-        return true
-      };
+
+        // Event listeners for play mode selection
+        playPcBtn.addEventListener('click', () => {
+            playModeContainer.style.display = "none";
+            updateForm(playPcBtn);
+            GameLogic.init(true);
+            playAgainstPcMode = true;
+        });
+        playHumanBtn.addEventListener('click', () => {
+            playModeContainer.style.display = "none";
+            updateForm(playHumanBtn);
+            GameLogic.init(false);
+        });
+
+        // Set event listener for form validation.
+        // Check turn cannot be called until the form validation is complete.
+        // Once form validation returns true, init players using 
+        // the names from the form.
+        submitBtn.addEventListener('click', () => {
+            updateForm(submitBtn);
+        });
+
+        // Create restart button
+        restartButton = document.querySelector(".restartBtn");
+        gameEndInfo = document.querySelector(".restartContainer");
+        restartButton.addEventListener("click", () => {
+            gameEndInfo.style.display = "none";
+            GameLogic.restartGame();
+        });
+
+        GameLogic.checkTurn(grid);
     };
-    
+
+    const updateForm = (btnPressed) => {
+        const form = document.querySelector("#playerForm");
+
+        if (btnPressed.classList.value == "playPcBtn") {
+            form.style.display = "flex";
+            playerTwo.style.display = "none";
+            playerTwoLabel.style.display = "none";
+            playerOneLabel.innerHTML = "Player Name";
+        } else if (btnPressed.classList.value == "playHumanBtn") {
+            form.style.display = "flex";
+        }
+
+        if (hasFormBeenCompleted(form)) {
+            if (!playAgainstPcMode) {
+                Players.showPlayerInfo(playerOne.value, playerTwo.value);
+            } else if (playAgainstPcMode) {
+                Players.showPlayerInfo(playerOne.value, "Killer AI");
+            }
+        }
+    }
+
+    const hasFormBeenCompleted = (form) => {
+        if (validationCheck() == true) {
+            form.style.display = "none";
+            grid.forEach(cell => {
+                cell.style.display = "";
+            });
+            return true
+        };
+    };
+
     // Validation check on both names.
     const validationCheck = () => {
-      // Not really sure how this works as these variables are never declared.
-      if (playerOne.value.match("^[A-Za-z]{1,100}") &&
-          playerTwo.value.match("^[A-Za-z]{1,100}")) {
-        return true
-      } else {
-        return false
-      };
-    };
-
-    const takeTurn = (index) => {
-      if (gameOver == false) {
-        // Remainder by the square amount.
-        // 4x4 = remainder 4.
-        // 10x10 = remainder 10.
-        let j = index % 3;
-        // J is columns.
-        // If cell 4 is 1, I = 4 - J (Which is 1 because it's the % of 4/3).
-        // The reason for 4/3 is because we have a % 3.
-        // 4 - J(1) = 3
-        // I = 3/3
-        let i = (index - j) / 3;
-        // Check if the cell is empty
-        if (boardData[i][j] == 0) {
-          // Place current player marker in cell
-          boardData[i][j] = player;
-          // Change player (if player is 1, it becomes -1. If player is -1 it becomes 1. So this way it always toggles between player 1 and -1)
-          player *= -1
-          // Update game board with markers
-          drawMarkers();
-          // Check to see if the game is over
-          checkGameOver();
+        if (!playAgainstPcMode) {
+            if (playerOne.value.match("^[A-Za-z]{1,100}") &&
+                playerTwo.value.match("^[A-Za-z]{1,100}")) {
+                return true
+            } else {
+                return false
+            };
+        } else if (playAgainstPcMode) {
+            if (playerOne.value.match("^[A-Za-z]{1,100}")) {
+                return true
+            } else {
+                return false
+            };
         };
-      };
-    };
-
-    // Function for checking which cell has been clicked
-    // Add hover effect to the cell
-    // Doesn't work like this, needs looking at
-    const checkTurn = () => {
-      grid.forEach(cell => {
-        cell.addEventListener('mouseenter', () => { 
-          if (cell.classList != 'x') {
-            cell.classList.add('x');
-          }
-        });
-        cell.addEventListener('mouseleave', () => {
-          cell.classList.remove('x');
-        });
-      });
-      grid.forEach((cell, index) => {
-          cell.addEventListener('click', () => {
-            takeTurn(index);
-          });
-      });
     };
 
     // Function for drawing the markers on the game board
-    const drawMarkers = () => {
-      const board = document.querySelector(".board");
-      for (i = 0; i < 3; i++) {
-        for (j = 0; j < 3; j++) {
-          if (boardData[i][j] == 1) {
-            board.children[(i*3) + j].classList.add("x");
-          } else if (boardData[i][j] == -1) {
-            board.children[(i*3) + j].classList.add("circle");
-          };
+    const drawMarkers = (boardData) => {
+        const board = document.querySelector(".board");
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 3; j++) {
+                if (boardData[i][j] == 1) {
+                    board.children[(i * 3) + j].classList.add("x");
+                    board.children[(i * 3) + j].classList.remove("xHover");
+                } else if (boardData[i][j] == -1) {
+                    board.children[(i * 3) + j].classList.add("circle");
+                    board.children[(i * 3) + j].classList.remove("circleHover");
+                };
+            };
         };
-      };
+    };
+
+    const showWinner = (winner) => {
+        gameOutcomeText = document.querySelector(".gameOutcome");
+
+        gameEndInfo.style.display = "flex";
+        if (winner == 1) {
+            gameOutcomeText.textContent = playerOne.value + ` Wins!!`;
+        } else if (winner == -1) {
+            gameOutcomeText.textContent = playerTwo.value + ` Wins!!`;
+        } else if (winner == 0) {
+            gameOutcomeText.textContent = "It's a Tie!";
+        };
+    };
+
+    // Function for resetting the markers after a game is finished
+    const resetMarkers = () => {
+        grid.forEach(cell => {
+            cell.className = "cell"
+        })
+    };
+
+    return {
+        init, drawMarkers, showWinner, resetMarkers
+    };
+})();
+
+const GameLogic = (() => {
+    let boardData =
+        [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ];
+
+    let playerOneTurn = true;
+    let playAgainstPc = false;
+
+    const init = (playMode) => {
+        if (playMode == true) {
+            playAgainstPc = true
+        } else {
+            playAgainstPc = false
+        };
+    };
+
+
+    // Function for checking which cell has been clicked
+    // Index (cellClickedValue) returns the number of which cell is clicked
+    const checkTurn = (grid) => {
+        let hasMouseLeftCell = true;
+        grid.forEach((cell, cellClickedValue) => {
+            cell.addEventListener('mouseenter', () => {
+                hoverEffect(cell, false);
+            });
+            cell.addEventListener('mouseleave', () => {
+                hoverEffect(cell, hasMouseLeftCell);
+            });
+            cell.addEventListener('click', () => {
+                takeTurn(cellClickedValue);
+            });
+        });
+    };
+
+    const hoverEffect = (cell, hasMouseLeftCell) => {
+        if (!hasMouseLeftCell) {
+            if (playerOneTurn && cell.classList != "cell circle"
+                && cell.classList != "cell x") {
+                cell.classList.add("xHover");
+            } else if (
+                !playerOneTurn && cell.classList != "cell x"
+                && cell.classList != "cell circle") {
+                cell.classList.add("circleHover");
+            };
+        };
+        if (hasMouseLeftCell) {
+            if (playerOneTurn) {
+                cell.classList.remove("xHover");
+            } else if (!playerOneTurn) {
+                cell.classList.remove("circleHover");
+            }
+        };
+    };
+
+    const takeTurn = (cellClickedValue) => {
+        // Remainder 3 gives us the row because we have a 3x3 grid
+        let row = cellClickedValue % 3;
+        let col = (cellClickedValue - row) / 3;
+        if (!playAgainstPc) {
+            if (playerOneTurn) {
+                if (boardData[col][row] == 0) {
+                    boardData[col][row] = 1;
+                    playerOneTurn = false;
+                };
+            } else if (!playerOneTurn) {
+                if (boardData[col][row] == 0) {
+                    boardData[col][row] = -1;
+                    playerOneTurn = true;
+                };
+            };
+            GameBoard.drawMarkers(boardData);
+        } else if (playAgainstPc) {
+            if (boardData[col][row] == 0) {
+                boardData[col][row] = 1;
+            };
+            GameBoard.drawMarkers(boardData);
+            // AI takes it's turn, updates the board data and returns the updated data
+            boardData = AI.aiTakeTurn(boardData);
+            GameBoard.drawMarkers(boardData);
+        }
+
+        // Check to see if the game is over
+        checkGameOver();
     };
 
     // Function to check the winner
     const checkGameOver = () => {
+        let winner = 2;
 
-      // Check rows and columns
-      for (i = 0; i < boardData.length; i++) {
-        let rowSum = boardData[i][0] + boardData[i][1] + boardData[i][2];
-        let colSum = boardData[0][i] + boardData[1][i] + boardData[2][i];
-        // Check if all X or all O in any rows or columns
-        if (rowSum == 3 || colSum == 3) {
-          gameOver = true;
-          winner = 1;
-        } else if (rowSum == -3 || colSum == -3) {
-          gameOver = true;
-          winner = -1;
+        // Check rows and columns
+        for (i = 0; i < boardData.length; i++) {
+            let rowSum = boardData[i][0] + boardData[i][1] + boardData[i][2];
+            let colSum = boardData[0][i] + boardData[1][i] + boardData[2][i];
+            // Check if all X or all O in any rows or columns
+            if (rowSum == 3 || colSum == 3) {
+                winner = 1;
+            } else if (rowSum == -3 || colSum == -3) {
+                winner = -1;
+            }
         }
-      }
 
-      // Check diagonals
-      let diagonalSum1 = boardData[0][0] + boardData[1][1] + boardData[2][2]
-      let diagonalSum2 = boardData[0][2] + boardData[1][1] + boardData[2][0]
-      if (diagonalSum1 == 3 || diagonalSum2 == 3) {
-        gameOver = true;
-        winner = 1;
-      } else if (diagonalSum1 == -3 || diagonalSum2 == -3) {
-        gameOver = true;
-        winner = -1;
-      }
+        // Check diagonals
+        let diagonalSum1 = boardData[0][0] + boardData[1][1] + boardData[2][2]
+        let diagonalSum2 = boardData[0][2] + boardData[1][1] + boardData[2][0]
+        if (diagonalSum1 == 3 || diagonalSum2 == 3) {
+            winner = 1;
+        } else if (diagonalSum1 == -3 || diagonalSum2 == -3) {
+            winner = -1;
+        }
 
-      // Check for a tie
-      if (boardData[0].indexOf(0) == -1 && 
-          boardData[1].indexOf(0) == -1 && 
-          boardData[2].indexOf(0) == -1) {
-          gameOver = true;
-          tie = true;
+        // Check for a tie
+        if (boardData[0].indexOf(0) == -1 &&
+            boardData[1].indexOf(0) == -1 &&
+            boardData[2].indexOf(0) == -1) {
+            winner = 0;
         };
 
-      players.updateWinner(winner);
-
-      console.log(players);
-      // If game is over then trigger the appropriate function and display text
-      // 
-      // R: I have manually typed player 1 wins and player 2 wins. 
-      // This should instead take the player names from the object.
-      // This also needs to increase score
-      // 
-      if (gameOver == true) {
-          gameEndInfo.style.display = "flex";
-        if (winner == 1) {
-          gameOutcomeText.textContent = `Player 1 Wins!!`;
-        } else if (winner == -1) {
-          gameOutcomeText.textContent = `Player 2 Wins!!`;
-        } else if (tie == true) {
-          gameOutcomeText.textContent = "It's a Tie!";
+        // If there is a winner or a tie, update the score and show the winner info
+        if (winner < 2) {
+            Players.updateWinner(winner);
+            GameBoard.showWinner(winner);
         }
-      }
     };
 
-    // Add function to restart the game
     const restartGame = () => {
-      // reset game variables
-      gameOver = false;
-      winner = 0;
-      tie = false;
-      player = 1;
-      boardData = 
-      [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0]
-      ];
-      gameOutcomeText.textContent = "";
-      gameEndInfo.style.display = "none";
-      resetMarkers();
+        // reset game variables
+        winner = 2;
+        playerOneTurn = true;
+        boardData =
+            [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0]
+            ];
+        GameBoard.resetMarkers();
     }
-
-    // Function for resetting the markers after a game is finished
-    const resetMarkers = () => {
-      grid.forEach(cell => {
-        cell.className = "cell"
-      })
-    };
-
-    // 
-    // 
-    // R: What is this part below?
-    // 
-    return {
-      init
-    };
+    return { checkTurn, init, restartGame };
 })();
-
 
 // Use an IIFE so the player object is initialized.
 // Now we can access anything this object returns.
-const players = (() => {
+const Players = (() => {
     let playerOneScore = 0;
     let playerTwoScore = 0;
 
 
     const updateScore = (winner) => {
-      const playerOneScoreHtml = document.querySelector(".playerOneScore");
-      const playerTwoScoreHtml = document.querySelector(".playerTwoScore");
+        const playerOneScoreHtml = document.querySelector(".playerOneScore");
+        const playerTwoScoreHtml = document.querySelector(".playerTwoScore");
 
-      if (winner == 1) {
-        playerOneScore ++
-      } else if (winner == -1) {
-        playerTwoScore ++
-      }
+        if (winner == 1) {
+            playerOneScore++
+        } else if (winner == -1) {
+            playerTwoScore++
+        }
 
-      playerOneScoreHtml.innerHTML = "Score: " + playerOneScore;
-      playerTwoScoreHtml.innerHTML = "Score: " + playerTwoScore;
+        playerOneScoreHtml.innerHTML = "Score: " + playerOneScore;
+        playerTwoScoreHtml.innerHTML = "Score: " + playerTwoScore;
 
     };
 
     // Create 2 players using the arguments from the form.
     // Show player names and then run update score.
     const showPlayerInfo = (playerOneName, playerTwoName) => {
-      const playerOneHtml = document.querySelector(".playerOneName");
-      const playerTwoHtml = document.querySelector(".playerTwoName");
+        const playerOneHtml = document.querySelector(".playerOneName");
+        const playerTwoHtml = document.querySelector(".playerTwoName");
 
-      playerOneHtml.innerHTML = playerOneName;
-      playerTwoHtml.innerHTML = playerTwoName;
+        playerOneHtml.innerHTML = playerOneName;
+        playerTwoHtml.innerHTML = playerTwoName;
 
-      updateScore();
-      return playerOneName
+        updateScore();
+        return playerOneName
     }
 
     const updateWinner = (winner) => {
-      switch (winner) {
-        case 1:
-          {updateScore(1)};
-          break;
-        case -1:
-          {updateScore(-1)};
-          break;
-        case 0:
-          // Score doesn't need updating if it's a draw so we leave blank.
-          {};
-          break;
-      }
+        switch (winner) {
+            case 1:
+                { updateScore(1) };
+                break;
+            case -1:
+                { updateScore(-1) };
+                break;
+            case 0:
+                // Score doesn't need updating if it's a draw so we leave blank.
+                { };
+                break;
+        }
     }
 
-    return {showPlayerInfo, updateWinner}
+    return { showPlayerInfo, updateWinner }
 })();
 
-// Helper functions
-function add(counter, a) {
-  return counter + a;
-} 
+// Minimax AI
+const AI = (() => {
+    const aiTakeTurn = (boardData) => {
+        let markPlacement = returnColAndRow();
+
+        while (boardData[markPlacement[0]][markPlacement[1]] != 0) {
+            markPlacement = returnColAndRow();
+        }
+
+        boardData[markPlacement[0]][markPlacement[1]] = -1;
+        return boardData
+    }
+
+    const returnColAndRow = () => {
+        let rowAndCol = [];
+
+        rowAndCol.push(Math.floor(Math.random() * 3));
+        rowAndCol.push(Math.floor(Math.random() * 3));
+
+        return rowAndCol
+    }
+    return { aiTakeTurn };
+})();
 
 // Draw game grid
-gameBoard.init();
-// Test area
+GameBoard.init();

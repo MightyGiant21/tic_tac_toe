@@ -85,13 +85,30 @@ body {
     transform: rotate(-45deg);
 }
 
+.xHover::before,
+.xHover::after {
+    content: "";
+    position: absolute;
+    height: calc(var(--markSize));
+    width: calc(var(--markSize) * 0.1);
+    background-color: #8a7efd;
+}
+
+.xHover::after {
+    transform: rotate(45deg);
+}
+
+.xHover::before {
+    transform: rotate(-45deg)
+}
+
 .circle::before {
     content: "";
     position: absolute;
     width: var(--markSize);
     height: var(--markSize);
     border-radius: 50%;
-    background-color: #fa5555;
+    background-color: #ff4545;
 }
 
 .circle::after {
@@ -103,11 +120,35 @@ body {
     background-color: #0ed1eb;
 }
 
+.circleHover::before {
+    content: "";
+    position: absolute;
+    width: var(--markSize);
+    height: var(--markSize);
+    border-radius: 50%;
+    background-color: #f88282;
+}
+
+.circleHover::after {
+    content: "";
+    position: absolute;
+    width: calc(var(--markSize) * 0.8);
+    height: calc(var(--markSize) * 0.8);
+    border-radius: 50%;
+    background-color: #0ed1eb;
+}
+
 #playerForm {
-    display: flex;
+    display: none;
     flex-direction: column;
     justify-content: start;
     align-items: center;
+}
+
+
+.playModeContainer {
+    display: flex;
+    flex-direction: column;
 }
 
 label {
