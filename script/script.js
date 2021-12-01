@@ -54,6 +54,7 @@ const GameBoard = (() => {
 
         if (btnPressed.classList.value == "playPcBtn") {
             form.style.display = "flex";
+            playerTwo.value = "Killer AI";
             playerTwo.style.display = "none";
             playerTwoLabel.style.display = "none";
             playerOneLabel.innerHTML = "Player Name";
@@ -62,12 +63,8 @@ const GameBoard = (() => {
         }
 
         if (hasFormBeenCompleted(form)) {
-            if (!playAgainstPcMode) {
                 Players.showPlayerInfo(playerOne.value, playerTwo.value);
-            } else if (playAgainstPcMode) {
-                Players.showPlayerInfo(playerOne.value, "Killer AI");
-            }
-        }
+        };
     }
 
     const hasFormBeenCompleted = (form) => {
@@ -217,9 +214,8 @@ const GameLogic = (() => {
             if (boardData[col][row] == 0) {
                 boardData[col][row] = 1;
             };
-            GameBoard.drawMarkers(boardData);
+            //GameBoard.drawMarkers(boardData);
             // AI takes it's turn, updates the board data and returns the updated data
-            // Only call if there are any empty spaces in the board
             boardData = AI.aiTakeTurn(boardData);
             GameBoard.drawMarkers(boardData);
         }
@@ -338,20 +334,20 @@ const Players = (() => {
 // Minimax AI
 const AI = (() => {
     const aiTakeTurn = (boardData) => {
-        let markPlacement = returnColAndRow();
+        let newBoardData = aiAlgo(boardData);
+        return newBoardData
+    };
 
-        if (boardData[markPlacement[0]][markPlacement[1]] != 0 &&
-            (boardData[0].includes(0) ||
-            boardData[1].includes(0) ||
-            boardData[2].includes(0))) {
-            aiTakeTurn(boardData);
-        } else if (boardData[0].includes(0) ||
-            boardData[1].includes(0) ||
-            boardData[2].includes(0)) {
+    const aiAlgo = (boardData) => {
+        let markPlacement = returnColAndRow();
+        
+        // Check if board has a 0 in the location returned by markPlacement
+        if (boardData[markPlacement[0]][markPlacement[1]] == 0) {
             boardData[markPlacement[0]][markPlacement[1]] = -1;
-            console.log('boardData: ', JSON.stringify(boardData));
             return boardData
-        }
+        } else if (
+            boardData[markPlacement[0]][markPlacement[1]] != 0) {
+        };
     }
 
     const returnColAndRow = () => {
