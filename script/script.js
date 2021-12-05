@@ -214,10 +214,11 @@ const GameLogic = (() => {
             if (boardData[col][row] == 0) {
                 boardData[col][row] = 1;
             };
-            //GameBoard.drawMarkers(boardData);
             // AI takes it's turn, updates the board data and returns the updated data
-            boardData = AI.aiTakeTurn(boardData);
-            GameBoard.drawMarkers(boardData);
+            if (AI.canPlay(boardData)) {
+                boardData = AI.aiTakeTurn(boardData);
+            }
+            GameBoard.drawMarkers(boardData)
         }
 
         // Check to see if the game is over
@@ -334,21 +335,31 @@ const Players = (() => {
 // Minimax AI
 const AI = (() => {
     const aiTakeTurn = (boardData) => {
-        let newBoardData = aiAlgo(boardData);
-        return newBoardData
+        boardData = aiAlgo(boardData);
+        return boardData
     };
 
     const aiAlgo = (boardData) => {
-        let markPlacement = returnColAndRow();
+        let x = returnColAndRow();
         
         // Check if board has a 0 in the location returned by markPlacement
-        if (boardData[markPlacement[0]][markPlacement[1]] == 0) {
-            boardData[markPlacement[0]][markPlacement[1]] = -1;
+        if (boardData[x[0]][x[1]] == 0) {
+            boardData[x[0]][x[1]] = -1;
             return boardData
-        } else if (
-            boardData[markPlacement[0]][markPlacement[1]] != 0) {
+        } else if (canPlay(boardData)) {
+            return aiAlgo(boardData)
         };
-    }
+    };
+
+    const canPlay = (boardData) => {
+        let board = [].concat.apply([], boardData);
+        if (board.includes(0)) {
+            return true
+        } else {
+            return false
+        }
+    };
+
 
     const returnColAndRow = () => {
         let rowAndCol = [];
@@ -358,7 +369,7 @@ const AI = (() => {
 
         return rowAndCol
     }
-    return { aiTakeTurn };
+    return { aiTakeTurn, canPlay };
 })();
 
 // Draw game grid
